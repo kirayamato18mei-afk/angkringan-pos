@@ -3,17 +3,14 @@ import pandas as pd
 from datetime import datetime
 import os
 
-if not os.path.exists('data_menu.csv'):
-    pd.DataFrame({'Nama':['Nasi Kucing'], 'Stok':[100], 'HargaJual':[3000], 'HargaModal':[1500]}).to_csv('data_menu.csv', index=False)
-if not os.path.exists('data_transaksi.csv'):
-    pd.DataFrame(columns=['Tanggal', 'Nama', 'Qty', 'TotalJual', 'TotalModal']).to_csv('data_transaksi.csv', index=False)
-
 st.set_page_config(layout="wide")
 st.title("🍱 Angkringan Pro-POS")
 
-menu = st.sidebar.radio("Navigasi:", ["Kasir", "Laporan", "Stok"])
+# Load data
 df_m = pd.read_csv('data_menu.csv')
 df_t = pd.read_csv('data_transaksi.csv')
+
+menu = st.sidebar.radio("Navigasi:", ["Kasir", "Laporan", "Stok"])
 
 if menu == "Kasir":
     st.subheader("🛒 Kasir")
@@ -24,7 +21,8 @@ if menu == "Kasir":
         df_m.at[idx, 'Stok'] -= qty
         new_row = {'Tanggal': datetime.now().strftime('%Y-%m-%d'), 'Nama': produk, 'Qty': qty, 
                    'TotalJual': qty*df_m.at[idx, 'HargaJual'], 'TotalModal': qty*df_m.at[idx, 'HargaModal']}
-        pd.concat([df_t, pd.DataFrame([new_row])]).to_csv('data_transaksi.csv', index=False)
+        df_t = pd.concat([df_t, pd.DataFrame([new_row])])
+        df_t.to_csv('data_transaksi.csv', index=False)
         df_m.to_csv('data_menu.csv', index=False)
         st.success("Transaksi Sukses!")
 
